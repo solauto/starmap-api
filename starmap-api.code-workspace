@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true,
+		"rust-analyzer.files.excludeDirs": [
+			".cargo"
+		],
+		"files.watcherExclude": {
+			"**/.cargo/**": true
+		},
+		"editor.tabSize": 2,
+		"editor.detectIndentation": false
+	}
+}
