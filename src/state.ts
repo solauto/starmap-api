@@ -1,6 +1,6 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { deserializeUnchecked, Schema } from 'borsh';
-import { RecordType } from '.';
+import { RUST_DEFAULT_PUBLIC_KEY } from '.';
 
 class Signatory {
   static TWILIO = new PublicKey('H3eJ6gDobGnkmuU5t8bYybCH4wu9BQc5e2s3Nk5tM4Fy');
@@ -102,7 +102,10 @@ export class StarState {
       return res;
     }
 
-    if (res.owner === PublicKey.default) {
+    if (
+      res.owner.equals(PublicKey.default) ||
+      res.owner.equals(RUST_DEFAULT_PUBLIC_KEY)
+    ) {
       res.invalidReason = 'Unowned record';
       return res;
     }
