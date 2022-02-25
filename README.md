@@ -88,6 +88,10 @@ See also [state.ts](js/api/state.ts)
 
 ## DEVELOPER
 
+### GitHub
+
+Auto-create a PR by pushing your local branch to pr/\*
+
 ### INSTALL
 
 ```bash
