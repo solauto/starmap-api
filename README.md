@@ -90,7 +90,7 @@ See also [state.ts](js/api/state.ts)
 
 ### GitHub
 
-Auto-create a PR by pushing your local branch to pr/\*
+Auto-create a PR by pushing to a remote branch "pr/\*"
 
 ### INSTALL
 
