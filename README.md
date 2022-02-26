@@ -131,9 +131,9 @@ main()
 
 ## ROADMAP
 
-- Publish this API on GitHub
+- [Automated version bump and npm publish](https://github.com/marketplace/actions/automated-version-bump)
 - Stars aliases
 - Atomic resize instruction
 - [Civic](https://civic.com) integration
 - Account lock feature
-- Confidential / private transactions
+- Confidential / private transactions (eg. spl-token 2022)
