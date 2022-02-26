@@ -17,6 +17,9 @@ import { StarState, EscrowRootState, EscrowState } from './state';
 
 const U32_MAX = 0xffffffff;
 export const MAX_NAME_LENGTH = 255;
+export const RUST_DEFAULT_PUBLIC_KEY = new PublicKey(
+  '11111111111111111111111111111111'
+);
 
 export class Numberu32 extends BN {
   /**
