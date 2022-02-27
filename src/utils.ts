@@ -176,7 +176,8 @@ export async function getEscrowAccount(
 export async function getEscrowAccounts(
   connection: Connection,
   hashedName: Buffer,
-  recordType: number
+  recordType: number,
+  senderFilter: PublicKey | undefined
 ): Promise<EscrowState[]> {
   let root = await getEscrowRootAccount(connection, hashedName, recordType);
   var accounts: EscrowState[] = [];
@@ -189,7 +190,8 @@ export async function getEscrowAccounts(
       index
     );
     if (account == null) throw Error('Null pointer in escrow chain');
-    accounts.push(account);
+    if (!senderFilter || account.sender.equals(senderFilter))
+      accounts.push(account);
     index += 1;
   }
   return accounts;
