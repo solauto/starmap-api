@@ -177,7 +177,7 @@ export async function getEscrowAccounts(
   connection: Connection,
   hashedName: Buffer,
   recordType: number,
-  senderFilter: PublicKey | undefined
+  senderFilter?: PublicKey | null
 ): Promise<EscrowState[]> {
   let root = await getEscrowRootAccount(connection, hashedName, recordType);
   var accounts: EscrowState[] = [];
