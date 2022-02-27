@@ -192,7 +192,7 @@ export async function getEscrowAccounts(
     if (account == null) throw Error('Null pointer in escrow chain');
     if (!senderFilter || account.sender.equals(senderFilter))
       accounts.push(account);
-    index += 1;
+    index = account.next_index;
   }
   return accounts;
 }
