@@ -172,6 +172,9 @@ export class EscrowState {
   next_index: number;
   sender: PublicKey;
 
+  // Derived info
+  address = PublicKey.default;
+
   static schema: Schema = new Map([
     [
       EscrowState,
@@ -222,6 +225,12 @@ export class EscrowState {
     if (accountInfo == null || !accountInfo.owner.equals(programId)) {
       return null;
     }
-    return deserializeUnchecked(this.schema, EscrowState, accountInfo.data);
+    var record = deserializeUnchecked(
+      this.schema,
+      EscrowState,
+      accountInfo.data
+    );
+    record.address = accountKey;
+    return record;
   }
 }
