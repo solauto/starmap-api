@@ -205,7 +205,12 @@ export class EscrowState {
     this.sender = new PublicKey(obj.sender);
   }
 
-  public static empty(index: number, prevIndex: number, nextIndex: number) {
+  public static empty(
+    index: number,
+    prevIndex: number,
+    nextIndex: number,
+    address: PublicKey
+  ) {
     let ret = new EscrowState({
       versionMajor: EscrowState.MIN_VERSION,
       index: index,
@@ -213,6 +218,7 @@ export class EscrowState {
       next_index: nextIndex,
       sender: PublicKey.default.toBytes(),
     });
+    ret.address = address;
     return ret;
   }
 

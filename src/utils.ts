@@ -201,27 +201,25 @@ export async function getNextAvailableEscrowAccount(
   connection: Connection,
   hashedName: Buffer,
   recordType: number
-): Promise<[EscrowState, PublicKey]> {
+): Promise<EscrowState> {
   let rootState = await getEscrowRootAccount(
     connection,
     hashedName,
     recordType
   );
   if (!rootState) {
+    // no existing records
     const accountKey = await getEscrowAccountKey(hashedName, recordType, 1);
-    return [EscrowState.empty(1, 0, U32_MAX), accountKey];
+    return EscrowState.empty(1, 0, U32_MAX, accountKey);
   }
   if (rootState.next_index > 1) {
-    const accountKey = await getEscrowAccountKey(
-      hashedName,
-      recordType,
-      rootState.next_index
-    );
-    return [EscrowState.empty(1, 0, rootState.next_index), accountKey];
+    // root points past 1, insert @ 1
+    const accountKey = await getEscrowAccountKey(hashedName, recordType, 1);
+    return EscrowState.empty(1, 0, rootState.next_index, accountKey);
   }
   let index = 1;
   while (true) {
-    const accountKey = await getEscrowAccountKey(hashedName, recordType, index);
+    let accountKey = await getEscrowAccountKey(hashedName, recordType, index);
     const accountState = await EscrowState.retrieve(
       connection,
       accountKey,
@@ -229,11 +227,14 @@ export async function getNextAvailableEscrowAccount(
     );
     if (accountState == null) throw Error('Null pointer in escrow chain');
     index += 1;
+    accountKey = await getEscrowAccountKey(hashedName, recordType, index);
     if (accountState.next_index > index)
-      return [
-        EscrowState.empty(index, accountState.index, accountState.next_index),
-        accountKey,
-      ];
+      return EscrowState.empty(
+        index,
+        accountState.index,
+        accountState.next_index,
+        accountKey
+      );
   }
 }
 
