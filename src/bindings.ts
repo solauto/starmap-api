@@ -274,13 +274,15 @@ export async function deleteNameRegistry(
  * @param recordType The type of name record
  * @param payerKey The allocation cost payer
  * @param escrow The escrow account to delete
+ * @param mint The pubkey of the mint of the escrowed funds
  * @returns
  */
 export async function createEscrowAccount(
   name: string,
   recordType: RecordType,
   payerKey: PublicKey,
-  escrow: EscrowState
+  escrow: EscrowState,
+  mint: PublicKey
 ): Promise<TransactionInstruction> {
   if (
     escrow.index < 1 ||
@@ -304,7 +306,8 @@ export async function createEscrowAccount(
     recordType,
     escrow.prev_index,
     escrow.index,
-    escrow.next_index
+    escrow.next_index,
+    mint
   );
 }
 

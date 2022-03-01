@@ -122,6 +122,7 @@ export class EscrowRootState {
   // Blockchain data
   versionMajor: number;
   next_index: number;
+  name_account: PublicKey;
 
   static schema: Schema = new Map([
     [
@@ -131,19 +132,26 @@ export class EscrowRootState {
         fields: [
           ['versionMajor', 'u8'],
           ['next_index', 'u32'],
+          ['name_account', [32]],
         ],
       },
     ],
   ]);
-  constructor(obj: { versionMajor: number; next_index: number }) {
+  constructor(obj: {
+    versionMajor: number;
+    next_index: number;
+    name_account: Uint8Array;
+  }) {
     this.versionMajor = obj.versionMajor;
     this.next_index = obj.next_index;
+    this.name_account = new PublicKey(obj.name_account);
   }
 
   public static empty() {
     let ret = new EscrowRootState({
       versionMajor: 0,
       next_index: 0xffffffff,
+      name_account: PublicKey.default.toBytes(),
     });
     return ret;
   }
@@ -167,10 +175,12 @@ export class EscrowState {
 
   // Blockchain data
   versionMajor: number;
+  name_account: PublicKey;
   index: number;
   prev_index: number;
   next_index: number;
   sender: PublicKey;
+  mint: PublicKey;
 
   // Derived info
   address = PublicKey.default;
@@ -182,10 +192,12 @@ export class EscrowState {
         kind: 'struct',
         fields: [
           ['versionMajor', 'u8'],
+          ['next_index', 'u32'],
+          ['name_account', [32]],
           ['index', 'u32'],
           ['prev_index', 'u32'],
-          ['next_index', 'u32'],
           ['sender', [32]],
+          ['mint', [32]],
         ],
       },
     ],
@@ -193,16 +205,20 @@ export class EscrowState {
 
   constructor(obj: {
     versionMajor: number;
+    next_index: number;
+    name_account: Uint8Array;
     index: number;
     prev_index: number;
-    next_index: number;
     sender: Uint8Array;
+    mint: Uint8Array;
   }) {
     this.versionMajor = obj.versionMajor;
+    this.next_index = obj.next_index;
+    this.name_account = new PublicKey(obj.name_account);
     this.index = obj.index;
     this.prev_index = obj.prev_index;
-    this.next_index = obj.next_index;
     this.sender = new PublicKey(obj.sender);
+    this.mint = new PublicKey(obj.mint);
   }
 
   public static empty(
@@ -213,10 +229,12 @@ export class EscrowState {
   ) {
     let ret = new EscrowState({
       versionMajor: EscrowState.MIN_VERSION,
+      next_index: nextIndex,
+      name_account: PublicKey.default.toBytes(),
       index: index,
       prev_index: prevIndex,
-      next_index: nextIndex,
       sender: PublicKey.default.toBytes(),
+      mint: PublicKey.default.toBytes(),
     });
     ret.address = address;
     return ret;

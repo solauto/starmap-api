@@ -228,7 +228,8 @@ export function createEscrowInstruction(
   recordType: number,
   prevIndex: number,
   currIndex: number,
-  nextIndex: number
+  nextIndex: number,
+  mint: PublicKey
 ): TransactionInstruction {
   const keys = [
     {
@@ -270,6 +271,7 @@ export function createEscrowInstruction(
     new Numberu32(prevIndex).toBuffer(),
     new Numberu32(currIndex).toBuffer(),
     new Numberu32(nextIndex).toBuffer(),
+    mint.toBuffer(),
   ];
   const data = Buffer.concat(buffers);
 
