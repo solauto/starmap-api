@@ -221,7 +221,6 @@ export function createEscrowInstruction(
   systemProgramId: PublicKey,
   payerKey: PublicKey,
   nameAccountKey: PublicKey,
-  rootKey: PublicKey,
   prevKey: PublicKey,
   currKey: PublicKey,
   nextKey: PublicKey,
@@ -246,11 +245,6 @@ export function createEscrowInstruction(
       pubkey: nameAccountKey,
       isSigner: false,
       isWritable: false,
-    },
-    {
-      pubkey: rootKey,
-      isSigner: false,
-      isWritable: true,
     },
     {
       pubkey: prevKey,
@@ -354,7 +348,6 @@ export function deleteEscrowInstruction(
   requesterKey: PublicKey,
   senderKey: PublicKey,
   nameAccountKey: PublicKey,
-  rootKey: PublicKey,
   prevKey: PublicKey,
   currKey: PublicKey,
   nextKey: PublicKey,
@@ -384,11 +377,6 @@ export function deleteEscrowInstruction(
       pubkey: nameAccountKey,
       isSigner: false,
       isWritable: false,
-    },
-    {
-      pubkey: rootKey,
-      isSigner: false,
-      isWritable: true,
     },
     {
       pubkey: prevKey,
