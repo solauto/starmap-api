@@ -12,8 +12,14 @@ import {
 } from '@solana/web3.js';
 import BN from 'bn.js';
 
-import { AccountType, RecordType, STARMAP_PROGRAM_ID } from './bindings';
-import { StarState, EscrowRootState, EscrowState } from './state';
+import {
+  StarState,
+  EscrowRootState,
+  EscrowState,
+  AccountType,
+  RecordType,
+  STARMAP_PROGRAM_ID,
+} from './state';
 
 const U32_MAX = 0xffffffff;
 export const MAX_NAME_LENGTH = 255;

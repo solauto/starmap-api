@@ -18,37 +18,16 @@ import {
   setClaimKeyInstruction as setClaimKeyInstruction,
   withdrawEscrowInstruction,
 } from './instructions';
-import { StarState } from './state';
+import {
+  RecordType,
+  STARMAP_PROGRAM_ID,
+  StarState,
+  TREASURY_ACCOUNT,
+} from './state';
 import { Numberu64 } from './utils';
 import { getHashedName, getNameAccountKey, Numberu32 } from './utils';
 
 ////////////////////////////////////////////////////////////
-
-export const STARMAP_PROGRAM_ID = new PublicKey(
-  'starsfMtotCRZ2F7Bn5U2U7auwguBSJRPX3mhbwafoY'
-);
-
-// cSpell:ignore u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k
-export const TREASURY_ACCOUNT = new PublicKey(
-  'u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k'
-);
-
-export enum AccountType {
-  Record = 1,
-  Escrow = 2,
-  // Signatories = 3,
-  // Fees = 4,
-}
-
-export const MAJOR_VERSION = 1;
-
-export enum RecordType {
-  Invalid = 0,
-  Phone = 1,
-  Email = 2,
-  Stars = 3,
-  Civic = 4,
-}
 
 /**
  * Retrieve the name account.

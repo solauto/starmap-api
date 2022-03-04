@@ -2,9 +2,36 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { deserializeUnchecked, Schema } from 'borsh';
 import { RUST_DEFAULT_PUBLIC_KEY } from '.';
 
-class Signatory {
+export class Signatory {
   static TWILIO = new PublicKey('H3eJ6gDobGnkmuU5t8bYybCH4wu9BQc5e2s3Nk5tM4Fy');
 }
+
+export const STARMAP_PROGRAM_ID = new PublicKey(
+  'starsfMtotCRZ2F7Bn5U2U7auwguBSJRPX3mhbwafoY'
+);
+
+// cSpell:ignore u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k
+export const TREASURY_ACCOUNT = new PublicKey(
+  'u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k'
+);
+
+export enum AccountType {
+  Record = 1,
+  Escrow = 2,
+  // Signatories = 3,
+  // Fees = 4,
+}
+
+export const MAJOR_VERSION = 1;
+
+export enum RecordType {
+  Invalid = 0,
+  Phone = 1,
+  Email = 2,
+  Stars = 3,
+  Civic = 4,
+}
+
 export class StarState {
   // Constants
   static HEADER_LEN = 96;
