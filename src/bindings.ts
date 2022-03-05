@@ -5,7 +5,7 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { EscrowState, getEscrowAccountKey } from '.';
+import { ConfigState, CONFIG_ACCOUNT, EscrowState, getEscrowAccountKey } from '.';
 
 import {
   assignNameInstruction,
@@ -17,15 +17,18 @@ import {
   updateNameInstruction,
   setClaimKeyInstruction as setClaimKeyInstruction,
   withdrawEscrowInstruction,
+  updateConfigInstruction,
 } from './instructions';
 import {
+  ConfigType,
   RecordType,
   STARMAP_PROGRAM_ID,
   StarState,
   TREASURY_ACCOUNT,
 } from './state';
-import { Numberu64 } from './utils';
+import { getConfigAccountKey, Numberu64 } from './utils';
 import { getHashedName, getNameAccountKey, Numberu32 } from './utils';
+import { serialize, Schema } from 'borsh';
 
 ////////////////////////////////////////////////////////////
 
@@ -75,7 +78,7 @@ export async function authorizeVerificationPayment(
     payerKey,
     nameAccountKey,
     TREASURY_ACCOUNT,
-    PublicKey.default,
+    CONFIG_ACCOUNT,
     hashed_name,
     recordType,
     dataSize
@@ -372,4 +375,33 @@ export async function deleteEscrowAccount(
     escrow.index,
     escrow.next_index
   );
+}
+
+/**
+ * Overwrite the data of the given name registry.
+ *
+ * @param configType The type of name record
+ * @param offset The offset to begin writing data, starting at routingInfo[0]
+ * @param input_data The data to be written
+ */
+ export async function updateConfigData(
+  configType: ConfigType,
+  owner: PublicKey,
+  offset: number,
+  input_data: Buffer,
+  newConfig: ConfigState,
+): Promise<TransactionInstruction> {
+  const serialized = serialize(ConfigState.schema, newConfig);
+  const accountKey = await getConfigAccountKey(configType);
+  const instruction = updateConfigInstruction(
+    STARMAP_PROGRAM_ID,
+    accountKey,
+    owner,
+    ConfigType.General,
+    // @ts-ignore
+    new Numberu32(0),
+    Buffer.from(serialized),
+  );
+
+  return instruction;
 }

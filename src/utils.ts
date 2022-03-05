@@ -20,6 +20,7 @@ import {
   RecordType,
   STARMAP_PROGRAM_ID,
 } from './state';
+import { ConfigType } from '.';
 
 const U32_MAX = 0xffffffff;
 export const MAX_NAME_LENGTH = 255;
@@ -118,6 +119,19 @@ export async function getNameAccountKey(
   const accountTypeBuffer = Buffer.from(Uint8Array.from([AccountType.Record]));
   const recordTypeBuffer = Buffer.from(Uint8Array.from([recordType]));
   const seeds = [accountTypeBuffer, recordTypeBuffer, hashedName];
+  const [nameAccountKey] = await PublicKey.findProgramAddress(
+    seeds,
+    STARMAP_PROGRAM_ID
+  );
+  return nameAccountKey;
+}
+
+export async function getConfigAccountKey(
+  configType: ConfigType
+): Promise<PublicKey> {
+  const accountTypeBuffer = Buffer.from(Uint8Array.from([AccountType.Config]));
+  const recordTypeBuffer = Buffer.from(Uint8Array.from([configType]));
+  const seeds = [accountTypeBuffer, recordTypeBuffer];
   const [nameAccountKey] = await PublicKey.findProgramAddress(
     seeds,
     STARMAP_PROGRAM_ID

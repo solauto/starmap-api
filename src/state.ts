@@ -15,11 +15,17 @@ export const TREASURY_ACCOUNT = new PublicKey(
   'u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k'
 );
 
+// cSpell:ignore u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k
+export const CONFIG_ACCOUNT = new PublicKey(
+  'J3w6cXha2dihL628GPMHFtGkqPzEr8KCFF6c6SLfcexJ'
+);
+
 export enum AccountType {
   Record = 1,
   Escrow = 2,
-  // Signatories = 3,
-  // Fees = 4,
+  Config = 3,
+  // Signatories = ,
+  // Fees = ,
 }
 
 export const MAJOR_VERSION = 1;
@@ -30,6 +36,11 @@ export enum RecordType {
   Email = 2,
   Stars = 3,
   Civic = 4,
+}
+
+export enum ConfigType {
+  Invalid = 0,
+  General = 1,
 }
 
 export class StarState {
@@ -279,6 +290,145 @@ export class EscrowState {
     var record = deserializeUnchecked(
       this.schema,
       EscrowState,
+      accountInfo.data
+    );
+    record.address = accountKey;
+    return record;
+  }
+}
+
+export class ConfigState {
+  // Constants
+  static LEN = 37;
+  static MIN_VERSION = 1;
+
+  // Blockchain data
+  versionMajor: number;
+  
+  name_verify_phone_lamports: number;
+  name_verify_email_lamports: number;
+  name_assign_phone_lamports: number;
+  name_assign_email_lamports: number;
+
+  name_transfer_lamports: number;
+  name_delete_lamports: number;
+  escrow_create_lamports: number;
+  escrow_withdraw_lamports: number;
+  escrow_delete_lamports: number;
+
+  // Derived info
+  address = PublicKey.default;
+
+  static schema: Schema = new Map([
+    [
+      ConfigState,
+      {
+        kind: 'struct',
+        fields: [
+          ['versionMajor', 'u8'],
+          ['name_verify_phone_lamports', 'u32'],
+          ['name_verify_email_lamports', 'u32'],
+          ['name_assign_phone_lamports', 'u32'],
+          ['name_assign_email_lamports', 'u32'],
+
+          ['name_transfer_lamports', 'u32'],
+          ['name_delete_lamports', 'u32'],
+          ['escrow_create_lamports', 'u32'],
+          ['escrow_withdraw_lamports', 'u32'],
+          ['escrow_delete_lamports', 'u32'],
+        ],
+      },
+    ],
+  ]);
+
+  constructor(obj: {
+    versionMajor: number;
+    name_verify_phone_lamports: number;
+    name_assign_phone_lamports: number;
+    name_verify_email_lamports: number;
+    name_assign_email_lamports: number;
+
+    name_transfer_lamports: number;
+    name_delete_lamports: number;
+    escrow_create_lamports: number;
+    escrow_withdraw_lamports: number;
+    escrow_delete_lamports: number;
+  }) {
+    this.versionMajor = obj.versionMajor;
+    this.name_verify_phone_lamports = obj.name_verify_phone_lamports;
+    this.name_verify_email_lamports = obj.name_verify_email_lamports;
+    this.name_assign_phone_lamports = obj.name_assign_phone_lamports;
+    this.name_assign_email_lamports = obj.name_assign_email_lamports;
+
+    this.name_transfer_lamports = obj.name_transfer_lamports;
+    this.name_delete_lamports = obj.name_delete_lamports;
+    this.escrow_create_lamports = obj.escrow_create_lamports;
+    this.escrow_withdraw_lamports = obj.escrow_withdraw_lamports;
+    this.escrow_delete_lamports = obj.escrow_delete_lamports;
+  }
+
+  public static new(
+    address: PublicKey,
+    name_verify_phone_lamports: number,
+    name_assign_phone_lamports: number,
+    name_verify_email_lamports: number,
+    name_assign_email_lamports: number,
+    
+    name_transfer_lamports: number,
+    name_delete_lamports: number,
+    escrow_create_lamports: number,
+    escrow_withdraw_lamports: number,
+    escrow_delete_lamports: number,
+  ) {
+    let ret = new ConfigState({
+      versionMajor: ConfigState.MIN_VERSION,
+      name_verify_phone_lamports: name_verify_phone_lamports,
+      name_verify_email_lamports: name_verify_email_lamports,
+      name_assign_phone_lamports: name_assign_phone_lamports,
+      name_assign_email_lamports: name_assign_email_lamports,
+
+      name_transfer_lamports: name_transfer_lamports,
+      name_delete_lamports: name_delete_lamports,
+      escrow_create_lamports: escrow_create_lamports,
+      escrow_withdraw_lamports: escrow_withdraw_lamports,
+      escrow_delete_lamports: escrow_delete_lamports,
+    });
+    ret.address = address;
+    return ret;
+  }
+
+  public static default(
+    address: PublicKey
+  ) {
+    let ret = new ConfigState({
+      versionMajor: ConfigState.MIN_VERSION,
+      name_verify_phone_lamports: 1000000,
+      name_verify_email_lamports: 1000000,
+      name_assign_phone_lamports: 0,
+      name_assign_email_lamports: 0,
+    
+      name_transfer_lamports: 0,
+      name_delete_lamports: 0,
+      escrow_create_lamports: 0,
+      escrow_withdraw_lamports: 0,
+      escrow_delete_lamports: 0,
+    });
+    ret.address = address;
+    return ret;
+  }
+
+  public static async retrieve(
+    connection: Connection,
+    accountKey: PublicKey,
+    programId: PublicKey
+  ): Promise<ConfigState | null> {
+    let accountInfo = await connection.getAccountInfo(accountKey, 'processed');
+    if (accountInfo == null || !accountInfo.owner.equals(programId)) {
+      return null;
+    }
+    var record = deserializeUnchecked(
+      this.schema,
+      ConfigState,
       accountInfo.data
     );
     record.address = accountKey;

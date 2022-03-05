@@ -413,3 +413,41 @@ export function deleteEscrowInstruction(
     data,
   });
 }
+
+
+export function updateConfigInstruction(
+  nameProgramId: PublicKey,
+  accountKey: PublicKey,
+  authorityKey: PublicKey,
+  configType: number,
+  offset: Numberu32,
+  newData: Buffer
+): TransactionInstruction {
+  const buffers = [
+    Buffer.from(Int8Array.from([9])),
+    Buffer.from(Uint8Array.from([configType])),
+    offset.toBuffer(),
+    new Numberu32(newData.length).toBuffer(),
+    newData,
+  ];
+  const keys = [
+    {
+      pubkey: accountKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: authorityKey,
+      isSigner: true,
+      isWritable: true,
+    },
+  ];
+
+  const data = Buffer.concat(buffers);
+
+  return new TransactionInstruction({
+    keys,
+    programId: nameProgramId,
+    data,
+  });
+}
