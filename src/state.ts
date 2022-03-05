@@ -2,47 +2,6 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { deserializeUnchecked, Schema } from 'borsh';
 import { RUST_DEFAULT_PUBLIC_KEY } from '.';
 
-export class Signatory {
-  static TWILIO = new PublicKey('H3eJ6gDobGnkmuU5t8bYybCH4wu9BQc5e2s3Nk5tM4Fy');
-}
-
-export const STARMAP_PROGRAM_ID = new PublicKey(
-  'starsfMtotCRZ2F7Bn5U2U7auwguBSJRPX3mhbwafoY'
-);
-
-// cSpell:ignore u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k
-export const TREASURY_ACCOUNT = new PublicKey(
-  'u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k'
-);
-
-// cSpell:ignore u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k
-export const CONFIG_ACCOUNT = new PublicKey(
-  'J3w6cXha2dihL628GPMHFtGkqPzEr8KCFF6c6SLfcexJ'
-);
-
-export enum AccountType {
-  Record = 1,
-  Escrow = 2,
-  Config = 3,
-  // Signatories = ,
-  // Fees = ,
-}
-
-export const MAJOR_VERSION = 1;
-
-export enum RecordType {
-  Invalid = 0,
-  Phone = 1,
-  Email = 2,
-  Stars = 3,
-  Civic = 4,
-}
-
-export enum ConfigType {
-  Invalid = 0,
-  General = 1,
-}
-
 export class StarState {
   // Constants
   static HEADER_LEN = 96;
@@ -304,7 +263,7 @@ export class ConfigState {
 
   // Blockchain data
   versionMajor: number;
-  
+
   name_verify_phone_lamports: number;
   name_verify_email_lamports: number;
   name_verify_stars_lamports: number;
@@ -383,12 +342,12 @@ export class ConfigState {
     name_assign_phone_lamports: number,
     name_assign_email_lamports: number,
     name_assign_stars_lamports: number,
-    
+
     name_transfer_lamports: number,
     name_delete_lamports: number,
     escrow_create_lamports: number,
     escrow_withdraw_lamports: number,
-    escrow_delete_lamports: number,
+    escrow_delete_lamports: number
   ) {
     let ret = new ConfigState({
       versionMajor: ConfigState.MIN_VERSION,
@@ -409,9 +368,7 @@ export class ConfigState {
     return ret;
   }
 
-  public static default(
-    address: PublicKey
-  ) {
+  public static default(address: PublicKey) {
     let ret = new ConfigState({
       versionMajor: ConfigState.MIN_VERSION,
       name_verify_phone_lamports: 1000000,
@@ -420,7 +377,7 @@ export class ConfigState {
       name_assign_phone_lamports: 0,
       name_assign_email_lamports: 0,
       name_assign_stars_lamports: 0,
-    
+
       name_transfer_lamports: 0,
       name_delete_lamports: 0,
       escrow_create_lamports: 0,
