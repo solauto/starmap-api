@@ -299,7 +299,7 @@ export class EscrowState {
 
 export class ConfigState {
   // Constants
-  static LEN = 37;
+  static LEN = 45;
   static MIN_VERSION = 1;
 
   // Blockchain data
@@ -307,8 +307,10 @@ export class ConfigState {
   
   name_verify_phone_lamports: number;
   name_verify_email_lamports: number;
+  name_verify_stars_lamports: number;
   name_assign_phone_lamports: number;
   name_assign_email_lamports: number;
+  name_assign_stars_lamports: number;
 
   name_transfer_lamports: number;
   name_delete_lamports: number;
@@ -328,8 +330,10 @@ export class ConfigState {
           ['versionMajor', 'u8'],
           ['name_verify_phone_lamports', 'u32'],
           ['name_verify_email_lamports', 'u32'],
+          ['name_verify_stars_lamports', 'u32'],
           ['name_assign_phone_lamports', 'u32'],
           ['name_assign_email_lamports', 'u32'],
+          ['name_assign_stars_lamports', 'u32'],
 
           ['name_transfer_lamports', 'u32'],
           ['name_delete_lamports', 'u32'],
@@ -344,9 +348,11 @@ export class ConfigState {
   constructor(obj: {
     versionMajor: number;
     name_verify_phone_lamports: number;
-    name_assign_phone_lamports: number;
     name_verify_email_lamports: number;
+    name_verify_stars_lamports: number;
+    name_assign_phone_lamports: number;
     name_assign_email_lamports: number;
+    name_assign_stars_lamports: number;
 
     name_transfer_lamports: number;
     name_delete_lamports: number;
@@ -357,8 +363,10 @@ export class ConfigState {
     this.versionMajor = obj.versionMajor;
     this.name_verify_phone_lamports = obj.name_verify_phone_lamports;
     this.name_verify_email_lamports = obj.name_verify_email_lamports;
+    this.name_verify_stars_lamports = obj.name_verify_stars_lamports;
     this.name_assign_phone_lamports = obj.name_assign_phone_lamports;
     this.name_assign_email_lamports = obj.name_assign_email_lamports;
+    this.name_assign_stars_lamports = obj.name_assign_stars_lamports;
 
     this.name_transfer_lamports = obj.name_transfer_lamports;
     this.name_delete_lamports = obj.name_delete_lamports;
@@ -370,9 +378,11 @@ export class ConfigState {
   public static new(
     address: PublicKey,
     name_verify_phone_lamports: number,
-    name_assign_phone_lamports: number,
     name_verify_email_lamports: number,
+    name_verify_stars_lamports: number,
+    name_assign_phone_lamports: number,
     name_assign_email_lamports: number,
+    name_assign_stars_lamports: number,
     
     name_transfer_lamports: number,
     name_delete_lamports: number,
@@ -384,8 +394,10 @@ export class ConfigState {
       versionMajor: ConfigState.MIN_VERSION,
       name_verify_phone_lamports: name_verify_phone_lamports,
       name_verify_email_lamports: name_verify_email_lamports,
+      name_verify_stars_lamports: name_verify_stars_lamports,
       name_assign_phone_lamports: name_assign_phone_lamports,
       name_assign_email_lamports: name_assign_email_lamports,
+      name_assign_stars_lamports: name_assign_stars_lamports,
 
       name_transfer_lamports: name_transfer_lamports,
       name_delete_lamports: name_delete_lamports,
@@ -404,8 +416,10 @@ export class ConfigState {
       versionMajor: ConfigState.MIN_VERSION,
       name_verify_phone_lamports: 1000000,
       name_verify_email_lamports: 1000000,
+      name_verify_stars_lamports: 1000000,
       name_assign_phone_lamports: 0,
       name_assign_email_lamports: 0,
+      name_assign_stars_lamports: 0,
     
       name_transfer_lamports: 0,
       name_delete_lamports: 0,
