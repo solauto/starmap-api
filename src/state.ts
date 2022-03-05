@@ -2,36 +2,6 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { deserializeUnchecked, Schema } from 'borsh';
 import { RUST_DEFAULT_PUBLIC_KEY } from '.';
 
-export class Signatory {
-  static TWILIO = new PublicKey('H3eJ6gDobGnkmuU5t8bYybCH4wu9BQc5e2s3Nk5tM4Fy');
-}
-
-export const STARMAP_PROGRAM_ID = new PublicKey(
-  'starsfMtotCRZ2F7Bn5U2U7auwguBSJRPX3mhbwafoY'
-);
-
-// cSpell:ignore u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k
-export const TREASURY_ACCOUNT = new PublicKey(
-  'u8mnnXiQLYhVdjuE9wSzEpicpfgaM83ohw6SpGcFg5k'
-);
-
-export enum AccountType {
-  Record = 1,
-  Escrow = 2,
-  // Signatories = 3,
-  // Fees = 4,
-}
-
-export const MAJOR_VERSION = 1;
-
-export enum RecordType {
-  Invalid = 0,
-  Phone = 1,
-  Email = 2,
-  Stars = 3,
-  Civic = 4,
-}
-
 export class StarState {
   // Constants
   static HEADER_LEN = 96;
@@ -279,6 +249,157 @@ export class EscrowState {
     var record = deserializeUnchecked(
       this.schema,
       EscrowState,
+      accountInfo.data
+    );
+    record.address = accountKey;
+    return record;
+  }
+}
+
+export class ConfigState {
+  // Constants
+  static LEN = 45;
+  static MIN_VERSION = 1;
+
+  // Blockchain data
+  versionMajor: number;
+
+  name_verify_phone_lamports: number;
+  name_verify_email_lamports: number;
+  name_verify_stars_lamports: number;
+  name_assign_phone_lamports: number;
+  name_assign_email_lamports: number;
+  name_assign_stars_lamports: number;
+
+  name_transfer_lamports: number;
+  name_delete_lamports: number;
+  escrow_create_lamports: number;
+  escrow_withdraw_lamports: number;
+  escrow_delete_lamports: number;
+
+  // Derived info
+  address = PublicKey.default;
+
+  static schema: Schema = new Map([
+    [
+      ConfigState,
+      {
+        kind: 'struct',
+        fields: [
+          ['versionMajor', 'u8'],
+          ['name_verify_phone_lamports', 'u32'],
+          ['name_verify_email_lamports', 'u32'],
+          ['name_verify_stars_lamports', 'u32'],
+          ['name_assign_phone_lamports', 'u32'],
+          ['name_assign_email_lamports', 'u32'],
+          ['name_assign_stars_lamports', 'u32'],
+
+          ['name_transfer_lamports', 'u32'],
+          ['name_delete_lamports', 'u32'],
+          ['escrow_create_lamports', 'u32'],
+          ['escrow_withdraw_lamports', 'u32'],
+          ['escrow_delete_lamports', 'u32'],
+        ],
+      },
+    ],
+  ]);
+
+  constructor(obj: {
+    versionMajor: number;
+    name_verify_phone_lamports: number;
+    name_verify_email_lamports: number;
+    name_verify_stars_lamports: number;
+    name_assign_phone_lamports: number;
+    name_assign_email_lamports: number;
+    name_assign_stars_lamports: number;
+
+    name_transfer_lamports: number;
+    name_delete_lamports: number;
+    escrow_create_lamports: number;
+    escrow_withdraw_lamports: number;
+    escrow_delete_lamports: number;
+  }) {
+    this.versionMajor = obj.versionMajor;
+    this.name_verify_phone_lamports = obj.name_verify_phone_lamports;
+    this.name_verify_email_lamports = obj.name_verify_email_lamports;
+    this.name_verify_stars_lamports = obj.name_verify_stars_lamports;
+    this.name_assign_phone_lamports = obj.name_assign_phone_lamports;
+    this.name_assign_email_lamports = obj.name_assign_email_lamports;
+    this.name_assign_stars_lamports = obj.name_assign_stars_lamports;
+
+    this.name_transfer_lamports = obj.name_transfer_lamports;
+    this.name_delete_lamports = obj.name_delete_lamports;
+    this.escrow_create_lamports = obj.escrow_create_lamports;
+    this.escrow_withdraw_lamports = obj.escrow_withdraw_lamports;
+    this.escrow_delete_lamports = obj.escrow_delete_lamports;
+  }
+
+  public static new(
+    address: PublicKey,
+    name_verify_phone_lamports: number,
+    name_verify_email_lamports: number,
+    name_verify_stars_lamports: number,
+    name_assign_phone_lamports: number,
+    name_assign_email_lamports: number,
+    name_assign_stars_lamports: number,
+
+    name_transfer_lamports: number,
+    name_delete_lamports: number,
+    escrow_create_lamports: number,
+    escrow_withdraw_lamports: number,
+    escrow_delete_lamports: number
+  ) {
+    let ret = new ConfigState({
+      versionMajor: ConfigState.MIN_VERSION,
+      name_verify_phone_lamports: name_verify_phone_lamports,
+      name_verify_email_lamports: name_verify_email_lamports,
+      name_verify_stars_lamports: name_verify_stars_lamports,
+      name_assign_phone_lamports: name_assign_phone_lamports,
+      name_assign_email_lamports: name_assign_email_lamports,
+      name_assign_stars_lamports: name_assign_stars_lamports,
+
+      name_transfer_lamports: name_transfer_lamports,
+      name_delete_lamports: name_delete_lamports,
+      escrow_create_lamports: escrow_create_lamports,
+      escrow_withdraw_lamports: escrow_withdraw_lamports,
+      escrow_delete_lamports: escrow_delete_lamports,
+    });
+    ret.address = address;
+    return ret;
+  }
+
+  public static default(address: PublicKey) {
+    let ret = new ConfigState({
+      versionMajor: ConfigState.MIN_VERSION,
+      name_verify_phone_lamports: 1000000,
+      name_verify_email_lamports: 1000000,
+      name_verify_stars_lamports: 1000000,
+      name_assign_phone_lamports: 0,
+      name_assign_email_lamports: 0,
+      name_assign_stars_lamports: 0,
+
+      name_transfer_lamports: 0,
+      name_delete_lamports: 0,
+      escrow_create_lamports: 0,
+      escrow_withdraw_lamports: 0,
+      escrow_delete_lamports: 0,
+    });
+    ret.address = address;
+    return ret;
+  }
+
+  public static async retrieve(
+    connection: Connection,
+    accountKey: PublicKey,
+    programId: PublicKey
+  ): Promise<ConfigState | null> {
+    let accountInfo = await connection.getAccountInfo(accountKey, 'processed');
+    if (accountInfo == null || !accountInfo.owner.equals(programId)) {
+      return null;
+    }
+    var record = deserializeUnchecked(
+      this.schema,
+      ConfigState,
       accountInfo.data
     );
     record.address = accountKey;

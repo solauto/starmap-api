@@ -89,7 +89,6 @@ export function setClaimKeyInstruction(
 
 export function assignNameInstruction(
   nameProgramId: PublicKey,
-  systemProgramId: PublicKey,
   nameAccountKey: PublicKey,
   signatoryKey: PublicKey,
   ownerKey: PublicKey
@@ -121,7 +120,9 @@ export function transferNameInstruction(
   nameProgramId: PublicKey,
   nameAccountKey: PublicKey,
   currentNameOwnerKey: PublicKey,
-  newOwnerKey: PublicKey
+  newOwnerKey: PublicKey,
+  treasuryKey: PublicKey,
+  feeInfoKey: PublicKey
 ): TransactionInstruction {
   const buffers = [Buffer.from(Int8Array.from([3])), newOwnerKey.toBuffer()];
 
@@ -136,6 +137,16 @@ export function transferNameInstruction(
     {
       pubkey: currentNameOwnerKey,
       isSigner: true,
+      isWritable: false,
+    },
+    {
+      pubkey: treasuryKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: feeInfoKey,
+      isSigner: false,
       isWritable: false,
     },
   ];
@@ -186,7 +197,9 @@ export function deleteNameInstruction(
   nameProgramId: PublicKey,
   nameAccountKey: PublicKey,
   refundTargetKey: PublicKey,
-  nameOwnerKey: PublicKey
+  nameOwnerKey: PublicKey,
+  treasuryKey: PublicKey,
+  feeInfoKey: PublicKey
 ): TransactionInstruction {
   const buffers = [Buffer.from(Int8Array.from([5]))];
 
@@ -207,6 +220,16 @@ export function deleteNameInstruction(
       isSigner: false,
       isWritable: true,
     },
+    {
+      pubkey: treasuryKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: feeInfoKey,
+      isSigner: false,
+      isWritable: false,
+    },
   ];
 
   return new TransactionInstruction({
@@ -224,6 +247,8 @@ export function createEscrowInstruction(
   prevKey: PublicKey,
   currKey: PublicKey,
   nextKey: PublicKey,
+  treasuryKey: PublicKey,
+  feeInfoKey: PublicKey,
   hashed_name: Buffer,
   recordType: number,
   prevIndex: number,
@@ -262,6 +287,16 @@ export function createEscrowInstruction(
       isSigner: false,
       isWritable: true,
     },
+    {
+      pubkey: treasuryKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: feeInfoKey,
+      isSigner: false,
+      isWritable: false,
+    },
   ];
 
   const buffers = [
@@ -290,6 +325,8 @@ export function withdrawEscrowInstruction(
   srcTokenAccountKey: PublicKey,
   dstTokenAccountKey: PublicKey,
   splTokenProgramKey: PublicKey,
+  treasuryKey: PublicKey,
+  feeInfoKey: PublicKey,
   hashed_name: Buffer,
   recordType: number,
   index: number,
@@ -326,6 +363,16 @@ export function withdrawEscrowInstruction(
       isSigner: false,
       isWritable: false,
     },
+    {
+      pubkey: treasuryKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: feeInfoKey,
+      isSigner: false,
+      isWritable: false,
+    },
   ];
 
   const buffers = [
@@ -353,6 +400,8 @@ export function deleteEscrowInstruction(
   prevKey: PublicKey,
   currKey: PublicKey,
   nextKey: PublicKey,
+  treasuryKey: PublicKey,
+  feeInfoKey: PublicKey,
   hashed_name: Buffer,
   recordType: number,
   prevIndex: number,
@@ -395,6 +444,16 @@ export function deleteEscrowInstruction(
       isSigner: false,
       isWritable: true,
     },
+    {
+      pubkey: treasuryKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: feeInfoKey,
+      isSigner: false,
+      isWritable: false,
+    },
   ];
 
   const buffers = [
@@ -405,6 +464,49 @@ export function deleteEscrowInstruction(
     new Numberu32(currIndex).toBuffer(),
     new Numberu32(nextIndex).toBuffer(),
   ];
+  const data = Buffer.concat(buffers);
+
+  return new TransactionInstruction({
+    keys,
+    programId: nameProgramId,
+    data,
+  });
+}
+
+export function updateConfigInstruction(
+  nameProgramId: PublicKey,
+  systemProgramId: PublicKey,
+  accountKey: PublicKey,
+  authorityKey: PublicKey,
+  configType: number,
+  offset: Numberu32,
+  newData: Buffer
+): TransactionInstruction {
+  const buffers = [
+    Buffer.from(Int8Array.from([9])),
+    Buffer.from(Uint8Array.from([configType])),
+    offset.toBuffer(),
+    new Numberu32(newData.length).toBuffer(),
+    newData,
+  ];
+  const keys = [
+    {
+      pubkey: systemProgramId,
+      isSigner: false,
+      isWritable: false,
+    },
+    {
+      pubkey: authorityKey,
+      isSigner: true,
+      isWritable: true,
+    },
+    {
+      pubkey: accountKey,
+      isSigner: false,
+      isWritable: true,
+    },
+  ];
+
   const data = Buffer.concat(buffers);
 
   return new TransactionInstruction({
