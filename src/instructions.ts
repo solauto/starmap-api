@@ -515,3 +515,143 @@ export function updateConfigInstruction(
     data,
   });
 }
+
+export function transferAndNotifyInstruction(
+  nameProgramId: PublicKey,
+  systemProgramId: PublicKey,
+  payerKey: PublicKey,
+  srcTokenAccountKey: PublicKey,
+  dstTokenAccountKey: PublicKey,
+  splTokenProgramKey: PublicKey,
+  treasuryKey: PublicKey,
+  feeInfoKey: PublicKey,
+  transactionIdKey: PublicKey,
+  notifyReqKey: PublicKey,
+  signatoryKey: PublicKey,
+  recordType: number,
+  amount: BigInt
+): TransactionInstruction {
+  const keys = [
+    {
+      pubkey: systemProgramId,
+      isSigner: false,
+      isWritable: false,
+    },
+    {
+      pubkey: payerKey,
+      isSigner: true,
+      isWritable: true,
+    },
+    {
+      pubkey: srcTokenAccountKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: dstTokenAccountKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: splTokenProgramKey,
+      isSigner: false,
+      isWritable: false,
+    },
+    {
+      pubkey: treasuryKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: feeInfoKey,
+      isSigner: false,
+      isWritable: false,
+    },
+    {
+      pubkey: transactionIdKey,
+      isSigner: true,
+      isWritable: false,
+    },
+    {
+      pubkey: notifyReqKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: signatoryKey,
+      isSigner: false,
+      isWritable: true,
+    },
+  ];
+
+  const buffers = [
+    Buffer.from(Int8Array.from([10])),
+    Buffer.from(Uint8Array.from([recordType])),
+    new Numberu64(toBufferBE(amount.valueOf(), 8)).toBuffer(),
+  ];
+  const data = Buffer.concat(buffers);
+
+  return new TransactionInstruction({
+    keys,
+    programId: nameProgramId,
+    data,
+  });
+}
+
+export function consumeNotificationInstruction(
+  nameProgramId: PublicKey,
+  signatoryKey: PublicKey,
+  refundTargetKey: PublicKey,
+  treasuryKey: PublicKey,
+  feeInfoKey: PublicKey,
+  transactionIdKey: PublicKey,
+  notifyReqKey: PublicKey,
+  recordType: number,
+  success: number
+): TransactionInstruction {
+  const keys = [
+    {
+      pubkey: signatoryKey,
+      isSigner: true,
+      isWritable: false,
+    },
+    {
+      pubkey: refundTargetKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: treasuryKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: feeInfoKey,
+      isSigner: false,
+      isWritable: false,
+    },
+    {
+      pubkey: transactionIdKey,
+      isSigner: false,
+      isWritable: false,
+    },
+    {
+      pubkey: notifyReqKey,
+      isSigner: false,
+      isWritable: true,
+    },
+  ];
+
+  const buffers = [
+    Buffer.from(Int8Array.from([11])),
+    Buffer.from(Uint8Array.from([recordType])),
+    Buffer.from(Uint8Array.from([success])),
+  ];
+  const data = Buffer.concat(buffers);
+
+  return new TransactionInstruction({
+    keys,
+    programId: nameProgramId,
+    data,
+  });
+}

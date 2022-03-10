@@ -1,6 +1,6 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { deserializeUnchecked, Schema } from 'borsh';
-import { RUST_DEFAULT_PUBLIC_KEY } from '.';
+import { RecordType, RUST_DEFAULT_PUBLIC_KEY } from '.';
 
 export class StarState {
   // Constants
@@ -277,6 +277,9 @@ export class ConfigState {
   escrow_withdraw_lamports: number;
   escrow_delete_lamports: number;
 
+  notify_phone_lamports: number;
+  notify_email_lamports: number;
+
   // Derived info
   address = PublicKey.default;
 
@@ -299,6 +302,9 @@ export class ConfigState {
           ['escrow_create_lamports', 'u32'],
           ['escrow_withdraw_lamports', 'u32'],
           ['escrow_delete_lamports', 'u32'],
+
+          ['notify_phone_lamports', 'u32'],
+          ['notify_email_lamports', 'u32'],
         ],
       },
     ],
@@ -318,6 +324,9 @@ export class ConfigState {
     escrow_create_lamports: number;
     escrow_withdraw_lamports: number;
     escrow_delete_lamports: number;
+
+    notify_phone_lamports: number;
+    notify_email_lamports: number;
   }) {
     this.versionMajor = obj.versionMajor;
     this.name_verify_phone_lamports = obj.name_verify_phone_lamports;
@@ -332,6 +341,9 @@ export class ConfigState {
     this.escrow_create_lamports = obj.escrow_create_lamports;
     this.escrow_withdraw_lamports = obj.escrow_withdraw_lamports;
     this.escrow_delete_lamports = obj.escrow_delete_lamports;
+
+    this.notify_phone_lamports = obj.notify_phone_lamports;
+    this.notify_email_lamports = obj.notify_email_lamports;
   }
 
   public static new(
@@ -347,7 +359,10 @@ export class ConfigState {
     name_delete_lamports: number,
     escrow_create_lamports: number,
     escrow_withdraw_lamports: number,
-    escrow_delete_lamports: number
+    escrow_delete_lamports: number,
+
+    notify_phone_lamports: number,
+    notify_email_lamports: number
   ) {
     let ret = new ConfigState({
       versionMajor: ConfigState.MIN_VERSION,
@@ -363,6 +378,9 @@ export class ConfigState {
       escrow_create_lamports: escrow_create_lamports,
       escrow_withdraw_lamports: escrow_withdraw_lamports,
       escrow_delete_lamports: escrow_delete_lamports,
+
+      notify_phone_lamports: notify_phone_lamports,
+      notify_email_lamports: notify_email_lamports,
     });
     ret.address = address;
     return ret;
@@ -383,6 +401,9 @@ export class ConfigState {
       escrow_create_lamports: 0,
       escrow_withdraw_lamports: 0,
       escrow_delete_lamports: 0,
+
+      notify_phone_lamports: 1000000,
+      notify_email_lamports: 25000,
     });
     ret.address = address;
     return ret;
@@ -400,6 +421,100 @@ export class ConfigState {
     var record = deserializeUnchecked(
       this.schema,
       ConfigState,
+      accountInfo.data
+    );
+    record.address = accountKey;
+    return record;
+  }
+}
+
+export class NotificationRequest {
+  // Constants
+  static LEN = 138;
+  static MIN_VERSION = 1;
+
+  // Blockchain data
+  version_major: number;
+  record_type: RecordType;
+  sender: PublicKey;
+  recipient: PublicKey;
+  transaction_id: PublicKey;
+  mint: PublicKey;
+  amount: BigInt;
+
+  // Derived info
+  address = PublicKey.default;
+
+  static schema: Schema = new Map([
+    [
+      NotificationRequest,
+      {
+        kind: 'struct',
+        fields: [
+          ['version_major', 'u8'],
+          ['record_type', 'u8'],
+          ['sender', [32]],
+          ['recipient', [32]],
+          ['transaction_id', [32]],
+          ['mint', [32]],
+          ['amount', 'u64'],
+        ],
+      },
+    ],
+  ]);
+
+  constructor(obj: {
+    version_major: number;
+    record_type: RecordType;
+    sender: PublicKey;
+    recipient: PublicKey;
+    transaction_id: PublicKey;
+    mint: PublicKey;
+    amount: BigInt;
+  }) {
+    this.version_major = obj.version_major;
+    this.record_type = obj.record_type;
+    this.sender = new PublicKey(obj.sender);
+    this.recipient = new PublicKey(obj.recipient);
+    this.transaction_id = new PublicKey(obj.transaction_id);
+    this.mint = new PublicKey(obj.mint);
+    this.amount = obj.amount;
+  }
+
+  public static new(
+    address: PublicKey,
+    record_type: RecordType,
+    sender: PublicKey,
+    recipient: PublicKey,
+    transaction_id: PublicKey,
+    mint: PublicKey,
+    amount: BigInt
+  ) {
+    let ret = new NotificationRequest({
+      version_major: NotificationRequest.MIN_VERSION,
+      record_type: record_type,
+      sender: sender,
+      recipient: recipient,
+      transaction_id: transaction_id,
+      mint: mint,
+      amount: amount,
+    });
+    ret.address = address;
+    return ret;
+  }
+
+  public static async retrieve(
+    connection: Connection,
+    accountKey: PublicKey,
+    programId: PublicKey
+  ): Promise<NotificationRequest | null> {
+    let accountInfo = await connection.getAccountInfo(accountKey, 'processed');
+    if (accountInfo == null || !accountInfo.owner.equals(programId)) {
+      return null;
+    }
+    var record = deserializeUnchecked(
+      this.schema,
+      NotificationRequest,
       accountInfo.data
     );
     record.address = accountKey;

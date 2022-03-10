@@ -19,8 +19,11 @@ import {
   setClaimKeyInstruction as setClaimKeyInstruction,
   withdrawEscrowInstruction,
   updateConfigInstruction,
+  transferAndNotifyInstruction,
+  consumeNotificationInstruction,
 } from './instructions';
 import {
+  Signatory,
   ConfigType,
   RecordType,
   STARMAP_PROGRAM_ID,
@@ -417,6 +420,89 @@ export async function updateConfigData(
   );
 
   return instruction;
+}
+
+////////////////////////////////////////////////////////////
+/**
+ * Transfer and Create Notification Request
+ *
+ * @param recordType The type of name record
+ * @param requester The owner of the source token account who is requesting the transfer
+ * @param transactionId A unique signature for identifying this transaction, like Solana Pay
+ * @param amount The number of tokens to withdrawal; uses min(available, requested)
+ * @param srcTokenAccount The associated token address to withdraw from
+ * @param dstTokenAccount The associated token address to withdraw to
+ * @returns
+ */
+export async function transferAndNotify(
+  recordType: RecordType,
+  requester: PublicKey,
+  transactionId: PublicKey,
+  amount: BigInt,
+  srcTokenAccount: PublicKey,
+  dstTokenAccount: PublicKey
+): Promise<TransactionInstruction> {
+  return transferAndNotifyInstruction(
+    STARMAP_PROGRAM_ID,
+    SystemProgram.programId,
+    requester,
+    srcTokenAccount,
+    dstTokenAccount,
+    TOKEN_PROGRAM_ID,
+    TREASURY_ACCOUNT,
+    CONFIG_ACCOUNT,
+    transactionId,
+    await getNotificationAccountKey(recordType, transactionId),
+    Signatory.AWS,
+    recordType,
+    amount.valueOf()
+  );
+}
+
+////////////////////////////////////////////////////////////
+/**
+ * Consume Notification Request
+ *
+ * @param recordType The type of name record
+ * @param requester The owner of the source token account who is requesting the transfer
+ * @param refundTarget The account to which the PDA rent should be refunded
+ * @param transactionId A unique signature for identifying this transaction, like Solana Pay
+ * @param success Indicates if the notification was sent
+ * @returns
+ */
+export async function consumeNotification(
+  recordType: RecordType,
+  requester: PublicKey,
+  transactionId: PublicKey,
+  success: number
+): Promise<TransactionInstruction> {
+  return consumeNotificationInstruction(
+    STARMAP_PROGRAM_ID,
+    requester,
+    TREASURY_ACCOUNT,
+    TREASURY_ACCOUNT,
+    CONFIG_ACCOUNT,
+    transactionId,
+    await getNotificationAccountKey(recordType, transactionId),
+    recordType,
+    success
+  );
+}
+
+export async function getNotificationAccountKey(
+  recordType: number,
+  transactionId: PublicKey
+): Promise<PublicKey> {
+  const accountTypeBuffer = Buffer.from(
+    Uint8Array.from([AccountType.NotifyReq])
+  );
+  const recordTypeBuffer = Buffer.from(Uint8Array.from([recordType]));
+  const seeds = [accountTypeBuffer, recordTypeBuffer, transactionId.toBuffer()];
+  const [accountKey] = await PublicKey.findProgramAddress(
+    seeds,
+    STARMAP_PROGRAM_ID
+  );
+  return accountKey;
 }
 
 export function getHashedName(name: string): Buffer {

@@ -8,6 +8,7 @@ export const RUST_DEFAULT_PUBLIC_KEY = new PublicKey(
 
 export class Signatory {
   static TWILIO = new PublicKey('H3eJ6gDobGnkmuU5t8bYybCH4wu9BQc5e2s3Nk5tM4Fy');
+  static AWS = new PublicKey('3oeeGbkcWL8FCuXCvo4odRwPnRqvSBr8yi3WD4HDfNGq');
 }
 
 export const STARMAP_PROGRAM_ID = new PublicKey(
@@ -28,6 +29,7 @@ export enum AccountType {
   Record = 1,
   Escrow = 2,
   Config = 3,
+  NotifyReq = 4,
   // Signatories = ,
   // StarFees = ,
 }
