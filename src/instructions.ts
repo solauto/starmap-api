@@ -10,6 +10,7 @@ export function authorizeNameInstruction(
   nameAccountKey: PublicKey,
   treasuryKey: PublicKey,
   feeInfoKey: PublicKey,
+  signatoryKey: PublicKey,
   hashed_name: Buffer,
   recordType: number,
   dataSize: number
@@ -39,6 +40,11 @@ export function authorizeNameInstruction(
       pubkey: feeInfoKey,
       isSigner: false,
       isWritable: false,
+    },
+    {
+      pubkey: signatoryKey,
+      isSigner: false,
+      isWritable: true,
     },
   ];
 

@@ -87,6 +87,7 @@ export async function authorizeVerificationPayment(
     nameAccountKey,
     TREASURY_ACCOUNT,
     CONFIG_ACCOUNT,
+    Signatory.TWILIO, // TODO: use correct signatory for CIVIC, etc.
     hashed_name,
     recordType,
     dataSize
