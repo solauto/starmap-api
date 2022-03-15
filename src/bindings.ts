@@ -474,13 +474,14 @@ export async function transferAndNotify(
 export async function consumeNotification(
   recordType: RecordType,
   requester: PublicKey,
+  refund_target: PublicKey,
   transactionId: PublicKey,
   success: number
 ): Promise<TransactionInstruction> {
   return consumeNotificationInstruction(
     STARMAP_PROGRAM_ID,
     requester,
-    TREASURY_ACCOUNT,
+    refund_target,
     TREASURY_ACCOUNT,
     CONFIG_ACCOUNT,
     transactionId,
