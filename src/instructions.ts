@@ -731,3 +731,37 @@ export function transferNativeAndNotifyInstruction(
     data,
   });
 }
+
+export function updateNameFlagsInstruction(
+  nameProgramId: PublicKey,
+  nameAccountKey: PublicKey,
+  accountOwnerKey: PublicKey,
+  offset: number,
+  value: boolean
+): TransactionInstruction {
+  const buffers = [
+    Buffer.from(Int8Array.from([13])),
+    Buffer.from(Int8Array.from([offset])),
+    Buffer.from(Int8Array.from([value ? 1 : 0])),
+  ];
+  const keys = [
+    {
+      pubkey: nameAccountKey,
+      isSigner: false,
+      isWritable: true,
+    },
+    {
+      pubkey: accountOwnerKey,
+      isSigner: true,
+      isWritable: false,
+    },
+  ];
+
+  const data = Buffer.concat(buffers);
+
+  return new TransactionInstruction({
+    keys,
+    programId: nameProgramId,
+    data,
+  });
+}
