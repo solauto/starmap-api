@@ -22,6 +22,7 @@ import {
   transferAndNotifyInstruction,
   consumeNotificationInstruction,
   transferNativeAndNotifyInstruction,
+  updateNameFlagsInstruction,
 } from './instructions';
 import {
   Signatory,
@@ -81,7 +82,7 @@ export async function authorizeVerificationPayment(
   const hashed_name = getHashedName(name);
   const nameAccountKey = await getNameAccountKey(hashed_name, recordType);
 
-  const instruction = authorizeNameInstruction(
+  return authorizeNameInstruction(
     STARMAP_PROGRAM_ID,
     SystemProgram.programId,
     payerKey,
@@ -93,8 +94,6 @@ export async function authorizeVerificationPayment(
     recordType,
     dataSize
   );
-
-  return instruction;
 }
 
 ////////////////////////////////////////////////////////////
@@ -119,16 +118,13 @@ export async function setClaimKey(
 ): Promise<TransactionInstruction> {
   const hashed_name = getHashedName(name);
   const nameAccountKey = await getNameAccountKey(hashed_name, recordType);
-
-  const instruction = setClaimKeyInstruction(
+  return setClaimKeyInstruction(
     STARMAP_PROGRAM_ID,
     SystemProgram.programId,
     nameAccountKey,
     signatory,
     claimKey
   );
-
-  return instruction;
 }
 
 ////////////////////////////////////////////////////////////
@@ -151,15 +147,12 @@ export async function assignNameOwnership(
 ): Promise<TransactionInstruction> {
   const hashed_name = getHashedName(name);
   const nameAccountKey = await getNameAccountKey(hashed_name, recordType);
-
-  const instruction = assignNameInstruction(
+  return assignNameInstruction(
     STARMAP_PROGRAM_ID,
     nameAccountKey,
     claimKey,
     newOwner
   );
-
-  return instruction;
 }
 
 /**
@@ -210,7 +203,7 @@ export async function transferNameOwnership(
 ): Promise<TransactionInstruction> {
   const hashed_name = getHashedName(name);
   const nameAccountKey = await getNameAccountKey(hashed_name, recordType);
-  const instruction = transferNameInstruction(
+  return transferNameInstruction(
     STARMAP_PROGRAM_ID,
     nameAccountKey,
     owner,
@@ -218,8 +211,6 @@ export async function transferNameOwnership(
     TREASURY_ACCOUNT,
     CONFIG_ACCOUNT
   );
-
-  return instruction;
 }
 
 /**
@@ -239,15 +230,13 @@ export async function deleteNameRegistry(
 ): Promise<TransactionInstruction> {
   const hashed_name = getHashedName(name);
   const nameAccountKey = await getNameAccountKey(hashed_name, recordType);
-
   let refundTarget: PublicKey;
   if (refundTargetKey) {
     refundTarget = refundTargetKey;
   } else {
     refundTarget = owner;
   }
-
-  const instruction = deleteNameInstruction(
+  return deleteNameInstruction(
     STARMAP_PROGRAM_ID,
     nameAccountKey,
     owner,
@@ -255,8 +244,6 @@ export async function deleteNameRegistry(
     TREASURY_ACCOUNT,
     CONFIG_ACCOUNT
   );
-
-  return instruction;
 }
 
 ////////////////////////////////////////////////////////////
@@ -410,7 +397,7 @@ export async function updateConfigData(
 ): Promise<TransactionInstruction> {
   const serialized = serialize(ConfigState.schema, newConfig);
   const accountKey = await getConfigAccountKey(configType);
-  const instruction = updateConfigInstruction(
+  return updateConfigInstruction(
     STARMAP_PROGRAM_ID,
     SystemProgram.programId,
     accountKey,
@@ -420,8 +407,6 @@ export async function updateConfigData(
     new Numberu32(0),
     Buffer.from(serialized)
   );
-
-  return instruction;
 }
 
 ////////////////////////////////////////////////////////////
@@ -522,6 +507,78 @@ export async function transferNativeAndNotify(
     Signatory.AWS,
     recordType,
     amount.valueOf()
+  );
+}
+
+/**
+ * Overwrite the lock flag in the name record.
+ *
+ * @param name The name of the name registry to update
+ * @param owner The current owner
+ * @param newValue to write to the name record
+ */
+export async function updateNameLockFlag(
+  name: string,
+  recordType: RecordType,
+  owner: PublicKey,
+  setLocked: boolean
+): Promise<TransactionInstruction> {
+  const hashed_name = getHashedName(name);
+  const nameAccountKey = await getNameAccountKey(hashed_name, recordType);
+  return updateNameFlagsInstruction(
+    STARMAP_PROGRAM_ID,
+    nameAccountKey,
+    owner,
+    0,
+    setLocked
+  );
+}
+
+/**
+ * Overwrite the email notify disable flag in the name record.
+ *
+ * @param name The name of the name registry to update
+ * @param owner The current owner
+ * @param setDisabled
+ */
+export async function updateNotifyEmailFlag(
+  name: string,
+  recordType: RecordType,
+  owner: PublicKey,
+  setDisabled: boolean
+): Promise<TransactionInstruction> {
+  const hashed_name = getHashedName(name);
+  const nameAccountKey = await getNameAccountKey(hashed_name, recordType);
+  return updateNameFlagsInstruction(
+    STARMAP_PROGRAM_ID,
+    nameAccountKey,
+    owner,
+    4,
+    setDisabled
+  );
+}
+
+/**
+ * Overwrite the phone notify disable flag in the name record.
+ *
+ * @param name The name of the name registry to update
+ * @param owner The current owner
+ * @param setDisabled
+ */
+export async function updateNotifyPhoneFlag(
+  name: string,
+  recordType: RecordType,
+  owner: PublicKey,
+  setDisabled: boolean
+): Promise<TransactionInstruction> {
+  const hashed_name = getHashedName(name);
+  const nameAccountKey = await getNameAccountKey(hashed_name, recordType);
+  return updateNameFlagsInstruction(
+    STARMAP_PROGRAM_ID,
+    nameAccountKey,
+    owner,
+    5,
+    setDisabled
   );
 }
 
