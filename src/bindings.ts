@@ -21,6 +21,7 @@ import {
   updateConfigInstruction,
   transferAndNotifyInstruction,
   consumeNotificationInstruction,
+  transferNativeAndNotifyInstruction,
 } from './instructions';
 import {
   Signatory,
@@ -430,9 +431,9 @@ export async function updateConfigData(
  * @param recordType The type of name record
  * @param requester The owner of the source token account who is requesting the transfer
  * @param transactionId A unique signature for identifying this transaction, like Solana Pay
- * @param amount The number of tokens to withdrawal; uses min(available, requested)
- * @param srcTokenAccount The associated token address to withdraw from
- * @param dstTokenAccount The associated token address to withdraw to
+ * @param amount The raw number (not ui number) of tokens to transfer
+ * @param srcTokenAccount The associated token address to transfer from
+ * @param dstTokenAccount The associated token address to transfer to
  * @returns
  */
 export async function transferAndNotify(
@@ -474,20 +475,53 @@ export async function transferAndNotify(
 export async function consumeNotification(
   recordType: RecordType,
   requester: PublicKey,
-  refund_target: PublicKey,
+  refundTarget: PublicKey,
   transactionId: PublicKey,
   success: number
 ): Promise<TransactionInstruction> {
   return consumeNotificationInstruction(
     STARMAP_PROGRAM_ID,
     requester,
-    refund_target,
+    refundTarget,
     TREASURY_ACCOUNT,
     CONFIG_ACCOUNT,
     transactionId,
     await getNotificationAccountKey(recordType, transactionId),
     recordType,
     success
+  );
+}
+
+////////////////////////////////////////////////////////////
+/**
+ * Transfer Native and Create Notification Request
+ *
+ * @param recordType The type of name record
+ * @param requester The wallet address of the owner who is requesting the transfer
+ * @param transactionId A unique signature for identifying this transaction, like Solana Pay
+ * @param amount The number of lamports to transfer
+ * @param dstAccount The wallet address to transfer TO
+ * @returns
+ */
+export async function transferNativeAndNotify(
+  recordType: RecordType,
+  requester: PublicKey,
+  transactionId: PublicKey,
+  amount: BigInt,
+  dstAccount: PublicKey
+): Promise<TransactionInstruction> {
+  return transferNativeAndNotifyInstruction(
+    STARMAP_PROGRAM_ID,
+    SystemProgram.programId,
+    requester,
+    dstAccount,
+    TREASURY_ACCOUNT,
+    CONFIG_ACCOUNT,
+    transactionId,
+    await getNotificationAccountKey(recordType, transactionId),
+    Signatory.AWS,
+    recordType,
+    amount.valueOf()
   );
 }
 
