@@ -110,6 +110,7 @@ export class StarState {
     res.routingInfo = accountInfo.data?.slice(this.HEADER_LEN);
     res.isPresent = true;
     res.isAuthorized = res.flags.paid_to_assign && res.flags.paid_to_verify;
+    res.isReadyToAssign = res.flags.paid_to_assign && !res.flags.paid_to_verify;
 
     if (res.versionMajor < this.MIN_VERSION) {
       res.invalidReason = `Invalid version: ${res.versionMajor}; ${this.MIN_VERSION} required.`;
