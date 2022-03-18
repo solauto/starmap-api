@@ -2,6 +2,21 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { deserializeUnchecked, Schema } from 'borsh';
 import { RecordType, RUST_DEFAULT_PUBLIC_KEY } from '.';
 
+export type StarStateFlags = {
+  // Owner-controlled toggle: lock, which prevents changes to the footer
+  locked: boolean;
+  // Verification attempts cost money; denote payment and consumption here
+  paid_to_verify: boolean;
+  // Ownership establishment may be charged a separate fee
+  paid_to_assign: boolean;
+  // An assignment request with a valid claim signature occurred to a locked account
+  contested: boolean;
+  // Owner-controlled toggle: prevent starmap from sending emails
+  disable_notify_email: boolean;
+  // Owner-controlled toggle: prevent starmap from sending sms
+  disable_notify_phone: boolean;
+};
+
 export class StarState {
   // Constants
   static HEADER_LEN = 96;
@@ -16,6 +31,7 @@ export class StarState {
   routingInfo: Buffer | undefined;
 
   // Derived information
+  flags: StarStateFlags;
   isPresent: boolean = false;
   isAuthorized: boolean = false;
   isReadyToAssign: boolean = false;
@@ -49,6 +65,14 @@ export class StarState {
     this.state = obj.state;
     this.signatory = new PublicKey(obj.signatory);
     this.owner = new PublicKey(obj.owner);
+    this.flags = {
+      locked: (obj.state & (1 << 0)) > 0,
+      paid_to_verify: (obj.state & (1 << 1)) > 0,
+      paid_to_assign: (obj.state & (1 << 2)) > 0,
+      contested: (obj.state & (1 << 3)) > 0,
+      disable_notify_email: (obj.state & (1 << 4)) > 0,
+      disable_notify_phone: (obj.state & (1 << 5)) > 0,
+    };
   }
 
   public static empty(invalidReason: string = 'Uninitialized') {
@@ -72,13 +96,11 @@ export class StarState {
       nameAccountKey,
       'processed'
     );
-    if (accountInfo === null) {
+    if (accountInfo === null)
       return this.empty('Record account does not exist');
-    }
 
-    if (!accountInfo.owner.equals(programId)) {
+    if (!accountInfo.owner.equals(programId))
       return this.empty('Record account exists but is not initialized');
-    }
 
     let res: StarState = deserializeUnchecked(
       this.schema,
@@ -87,12 +109,7 @@ export class StarState {
     );
     res.routingInfo = accountInfo.data?.slice(this.HEADER_LEN);
     res.isPresent = true;
-
-    if ((res.state & 6) === 6) {
-      res.isAuthorized = true;
-    } else if (res.state & 4) {
-      res.isReadyToAssign = true;
-    }
+    res.isAuthorized = res.flags.paid_to_assign && res.flags.paid_to_verify;
 
     if (res.versionMajor < this.MIN_VERSION) {
       res.invalidReason = `Invalid version: ${res.versionMajor}; ${this.MIN_VERSION} required.`;
