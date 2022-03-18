@@ -3,10 +3,16 @@ import assert from 'assert';
 import {
   Connection,
   Keypair,
+  PublicKey,
   Transaction,
   TransactionInstruction,
 } from '@solana/web3.js';
 import BN from 'bn.js';
+import { RUST_DEFAULT_PUBLIC_KEY } from './constants';
+
+export function isDefault(key: PublicKey) {
+  return key.equals(PublicKey.default) || key.equals(RUST_DEFAULT_PUBLIC_KEY);
+}
 
 export class Numberu32 extends BN {
   /**

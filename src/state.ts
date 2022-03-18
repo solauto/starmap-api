@@ -1,6 +1,6 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { deserializeUnchecked, Schema } from 'borsh';
-import { RecordType, RUST_DEFAULT_PUBLIC_KEY } from '.';
+import { isDefault, RecordType, RUST_DEFAULT_PUBLIC_KEY } from '.';
 
 export type StarStateFlags = {
   // Owner-controlled toggle: lock, which prevents changes to the footer
@@ -84,6 +84,19 @@ export class StarState {
     return ret;
   }
 
+  public static create(recordType: RecordType, owner: PublicKey) {
+    let ret = new StarState({
+      versionMajor: 0,
+      recordType: recordType,
+      state: 0,
+      signatory: new Uint8Array(32),
+      owner: owner.toBytes(),
+    });
+    if (isDefault(owner)) ret.invalidReason = 'Unowned record';
+    else ret.isAssignedAndValid = true;
+    return ret;
+  }
+
   public static async retrieve(
     connection: Connection,
     nameAccountKey: PublicKey,
@@ -114,10 +127,7 @@ export class StarState {
       return res;
     }
 
-    if (
-      res.owner.equals(PublicKey.default) ||
-      res.owner.equals(RUST_DEFAULT_PUBLIC_KEY)
-    ) {
+    if (isDefault(res.owner)) {
       res.invalidReason = 'Unowned record';
       return res;
     }

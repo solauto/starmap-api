@@ -42,6 +42,9 @@ export enum RecordType {
   Email = 2,
   Stars = 3,
   Civic = 4,
+
+  // off-chain identities
+  Bonfida = 1000,
 }
 
 export enum ConfigType {
