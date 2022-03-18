@@ -11,10 +11,8 @@ export type StarStateFlags = {
   paid_to_assign: boolean;
   // An assignment request with a valid claim signature occurred to a locked account
   contested: boolean;
-  // Owner-controlled toggle: prevent starmap from sending emails
-  disable_notify_email: boolean;
-  // Owner-controlled toggle: prevent starmap from sending sms
-  disable_notify_phone: boolean;
+  // Owner-controlled toggle: prevent starmap from sending token receipt notifications
+  disable_notifications: boolean;
 };
 
 export class StarState {
@@ -70,8 +68,7 @@ export class StarState {
       paid_to_verify: (obj.state & (1 << 1)) > 0,
       paid_to_assign: (obj.state & (1 << 2)) > 0,
       contested: (obj.state & (1 << 3)) > 0,
-      disable_notify_email: (obj.state & (1 << 4)) > 0,
-      disable_notify_phone: (obj.state & (1 << 5)) > 0,
+      disable_notifications: (obj.state & (1 << 4)) > 0,
     };
   }
 

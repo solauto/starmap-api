@@ -541,7 +541,7 @@ export async function updateNameLockFlag(
  * @param owner The current owner
  * @param setDisabled
  */
-export async function updateNotifyEmailFlag(
+export async function updateNotificationPreference(
   name: string,
   recordType: RecordType,
   owner: PublicKey,
@@ -554,30 +554,6 @@ export async function updateNotifyEmailFlag(
     nameAccountKey,
     owner,
     4,
-    setDisabled
-  );
-}
-
-/**
- * Overwrite the phone notify disable flag in the name record.
- *
- * @param name The name of the name registry to update
- * @param owner The current owner
- * @param setDisabled
- */
-export async function updateNotifyPhoneFlag(
-  name: string,
-  recordType: RecordType,
-  owner: PublicKey,
-  setDisabled: boolean
-): Promise<TransactionInstruction> {
-  const hashed_name = getHashedName(name);
-  const nameAccountKey = await getNameAccountKey(hashed_name, recordType);
-  return updateNameFlagsInstruction(
-    STARMAP_PROGRAM_ID,
-    nameAccountKey,
-    owner,
-    5,
     setDisabled
   );
 }
