@@ -29,19 +29,37 @@ _With the exception of InitFee and Verify, the client can directly interact with
 
 ### SENDER ACTIONS
 
-1. Get Name Record
-   1. Client hashes PI and retrieves NameRecord from blockchain using client or RPC.
-   1. Client confirms version, state, type, and signatory pubkey in NameRecord.
-   1. Client extracts owner pubkey and (optionally) routing data.
-1. Direct Payment
-   1. Using wallet address above, wallet or app can send SOL or tokens.
-      1. Future support may include other routing via the name account's routing data.
-1. Escrowed Payment
-   1. If the NameRecord does not exist or has no owner, the sender can create an
-      escrow record and an associated token account that is owned by the escrow record.
-   1. The sender can then transfer tokens (including wrapped SOL) to the token account.
-   1. Until the name record is claimed, the escrow owner can withdraw funds from their
-      escrow record's associated token accounts to cancel the escrow.
+#### SEARCH
+
+1. Validate and normalize the name using `parseName`
+1. Abort if recordType is Invalid
+1. Fetch the name record using `retrieveNameRegistry`
+1. Confirm `record.isAssignedAndValid`
+1. Use `record.owner`
+
+#### PAYMENT WITH NOTIFICATIONS
+
+For transactions of value > $1 USD, Star Map can send the recipient an email notification.
+
+1. Client generates a transaction ID keypair (similar to Solana Pay)
+1. Client ensures the recipient has a respective associated token account
+   1. If it does not exist, the client can abort or pay to create the destination token account
+      transferAndNotify
+1. Client uses the transferAndNotify API to execute the transfer and create a notification request
+1. Client calls notification endpoint to send the notification and refund the request account rent.
+
+#### DIRECT PAYMENT
+
+- Using wallet address above, wallet or app can send SOL or tokens.
+
+#### ESCROWED PAYMENT
+
+If the NameRecord does not exist or has no owner, the sender can create an
+escrow record and an associated token account that is owned by the escrow record.
+
+1. The sender can then transfer tokens (including wrapped SOL) to the token account.
+1. Until the name record is claimed, the escrow owner can withdraw funds from their
+   escrow record's associated token accounts to cancel the escrow.
 
 ### REGISTRATION & RECIPIENT ACTIONS
 
@@ -57,14 +75,10 @@ _With the exception of InitFee and Verify, the client can directly interact with
    1. Client submits verification code, PI, and pubkey to verification server.
    1. Server performs assignment and consumes assignment fee on blockchain.
    1. Server 200 response indicates that assignment is complete.
-1. Update
-   1. Client sets wallet address and (opt) hash using blockchain client or RPC.
 1. Withdrawal
    1. Client withdrawals escrowed funds using blockchain client or RPC.
       This is useful if funds were sent before name registry creation/assignment.
    1. If SPL tokens are supported, those should also be transferred.
-1. Delete
-   1. Client deletes ownership, wallet and hash using client blockchain client or RPC.
 
 ## RECORD FORMAT
 
@@ -75,12 +89,13 @@ A name record contains:
 1. A state bitfield for internal state management
    1. Payment status bits for verify attempt and assignment
    1. A lock bit that the name owner can set to prevent reassignment
+   1. A notify bit that enables/disables notifications
 1. The pubkey of the signatory who assigned ownership
 1. The pubkey of the name owner who is allowed to
    1. Withdraw escrowed funds
    1. Update associated data
    1. Transfer account ownership
-   1. [FUTURE] Modify the lock bit
+   1. Modify flags such as the lock flag and notify flag
    1. Delete the record
 1. [OPTIONAL] Additional data such as routing addresses
 
@@ -94,25 +109,29 @@ See also [state.ts](js/api/state.ts)
 npm i --save starmap-api
 ```
 
-### EXAMPLE
+### VALIDATED GET EXAMPLE
 
 ```js
-import { RecordType, retrieveNameRegistry } from '../api';
+import { RecordType, retrieveNameRegistry, parseName } from 'starmap-api';
 
 async function main() {
+  let input = '+12345678910';
+  const { recordType, name, parseError } = parseName(input);
+  if (recordType == RecordType.Invalid) {
+    console.log('Invalid identifier: %s', name);
+    console.log('Error: %s', parseError.message);
+    return;
+  }
+  console.log('Retrieve identifier:', name);
+  const url = 'https://api.mainnet-beta.solana.com';
   const connection = new Connection(url, 'recent');
-  let type = RecordType.Phone;
-  let name = '+12345678910';
-  console.log('Retrieve email record:', name);
-  let res = await retrieveNameRegistry(conn, name, type);
-  console.log('---Record---');
-  console.log('Version:', res.versionMajor);
-  console.log('Type:', res.recordType);
-  console.log('State:', res.state);
-  console.log('Verifier:', res.signatory.toBase58());
-  console.log('Owner:', res.owner.toBase58());
-  console.log('Routing Info:', res.routingInfo);
-  console.log('\nSuccess\n');
+  let res = await retrieveNameRegistry(connection, name, recordType);
+  if (res.isAssignedAndValid) {
+    console.log('---Record---');
+    console.log('Owner:', res.owner.toBase58());
+  } else {
+    console.log('Name not assigned');
+  }
 }
 
 main()
@@ -125,15 +144,8 @@ main()
 
 ## Contact
 
+Gmail: starmap.network
+
 [Discord](https://discord.gg/dPNpAsgRZV)
 
 [Issues](https://github.com/solauto/starmap-api/issues)
-
-## ROADMAP
-
-- [Automated version bump and npm publish](https://github.com/marketplace/actions/automated-version-bump)
-- Stars aliases
-- Atomic resize instruction
-- [Civic](https://civic.com) integration
-- Account lock feature
-- Confidential / private transactions (eg. spl-token 2022)

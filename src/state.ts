@@ -1,6 +1,6 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { deserializeUnchecked, Schema } from 'borsh';
-import { isDefault, RecordType, RUST_DEFAULT_PUBLIC_KEY } from '.';
+import { isDefault, RecordType } from '.';
 
 export type StarStateFlags = {
   // Owner-controlled toggle: lock, which prevents changes to the footer

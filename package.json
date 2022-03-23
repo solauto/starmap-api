@@ -1,6 +1,6 @@
 {
   "name": "starmap-api",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Starmap Verified Public Directory Service API",
   "license": "AGPL-3.0",
   "author": "SolAuto",
@@ -23,6 +23,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "clean": "rm -rf dist",
     "prepare": "tsc",
     "build": "tsc",
     "pretty": "prettier --check 'src/**/*.[jt]s'",
@@ -47,6 +48,8 @@
     "@solana/web3.js": "^1.34.0",
     "bigint-buffer": "^1.1.5",
     "bn.js": "^5.1.3",
-    "borsh": "^0.7.0"
+    "borsh": "^0.7.0",
+    "libphonenumber-js": "^1.9.50",
+    "validator": "^13.7.0"
   }
 }
