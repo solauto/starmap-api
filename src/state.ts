@@ -415,7 +415,7 @@ export class ConfigState {
     let ret = new ConfigState({
       versionMajor: ConfigState.MIN_VERSION,
       name_verify_phone_lamports: 1000000,
-      name_verify_email_lamports: 1000000,
+      name_verify_email_lamports: 100000,
       name_verify_stars_lamports: 1000000,
       name_assign_phone_lamports: 0,
       name_assign_email_lamports: 0,
@@ -428,7 +428,7 @@ export class ConfigState {
       escrow_delete_lamports: 0,
 
       notify_phone_lamports: 1000000,
-      notify_email_lamports: 25000,
+      notify_email_lamports: 100000,
     });
     ret.address = address;
     return ret;

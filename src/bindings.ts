@@ -39,6 +39,7 @@ import { ConfigState, StarState, EscrowRootState, EscrowState } from './state';
 import { Numberu32 } from './utils';
 import { serialize } from 'borsh';
 import { createHash } from 'crypto';
+import { NotificationRequest } from '.';
 
 ////////////////////////////////////////////////////////////
 
@@ -726,13 +727,82 @@ export async function getNextAvailableEscrowAccount(
   }
 }
 
-export async function getCostEstimate(
+export type CostInfo = {
+  fee: number;
+  deposit: number;
+};
+
+/// Returns [rent, fee]
+export async function getVerifyCostLamports(
   connection: Connection,
-  dataSize: number
-): Promise<number> {
-  let totalSize = StarState.HEADER_LEN + dataSize;
-  const resp = await connection.getMinimumBalanceForRentExemption(totalSize);
-  return resp + LAMPORTS_PER_SOL / 100.0;
+  dataSize: number,
+  state: StarState
+): Promise<CostInfo> {
+  const totalSize = StarState.HEADER_LEN + dataSize;
+  const rent = await connection.getMinimumBalanceForRentExemption(totalSize);
+  const dynamicFees = await ConfigState.retrieve(
+    connection,
+    CONFIG_ACCOUNT,
+    STARMAP_PROGRAM_ID
+  );
+  const fees = dynamicFees || ConfigState.default(CONFIG_ACCOUNT);
+  let verify_fee = 0;
+  let assign_fee = 0;
+  if (state.recordType == RecordType.Phone) {
+    verify_fee = fees.name_verify_phone_lamports;
+    assign_fee = fees.name_assign_phone_lamports;
+  } else if (state.recordType == RecordType.Email) {
+    verify_fee = fees.name_verify_phone_lamports;
+    assign_fee = fees.name_assign_phone_lamports;
+  } else {
+    return { fee: 0, deposit: 0 };
+  }
+  if (state.flags.paid_to_assign) assign_fee = 0;
+  if (state.flags.paid_to_verify) verify_fee = 0;
+  return { fee: assign_fee + verify_fee, deposit: rent };
+}
+
+/// Returns: [rent, fee]
+export async function getEscrowCostLamports(
+  connection: Connection
+): Promise<CostInfo> {
+  // Since rent fees might become non-linear and there's overhead per account,
+  // and since EscrowRoot isn't always needed and EscrowRoot.LEN + EscrowState.LEN ~= SplToken.lEN,
+  // guesstimate about 2 SPL token accounts worth of data.
+  const halfRent = await connection.getMinimumBalanceForRentExemption(165);
+  const dynamicFees = await ConfigState.retrieve(
+    connection,
+    CONFIG_ACCOUNT,
+    STARMAP_PROGRAM_ID
+  );
+  const fees = dynamicFees || ConfigState.default(CONFIG_ACCOUNT);
+  let escrow_fee = fees.escrow_create_lamports;
+  return { fee: escrow_fee, deposit: 2 * halfRent };
+}
+
+/// Returns: [rent, fee]
+export async function getNotifyCostLamports(
+  connection: Connection,
+  recordType: RecordType
+): Promise<CostInfo> {
+  const rent = await connection.getMinimumBalanceForRentExemption(
+    NotificationRequest.LEN
+  );
+  const dynamicFees = await ConfigState.retrieve(
+    connection,
+    CONFIG_ACCOUNT,
+    STARMAP_PROGRAM_ID
+  );
+  const fees = dynamicFees || ConfigState.default(CONFIG_ACCOUNT);
+  let notify_fee = 0;
+  if (recordType == RecordType.Phone) {
+    notify_fee = fees.notify_phone_lamports;
+  } else if (recordType == RecordType.Email) {
+    notify_fee = fees.notify_email_lamports;
+  } else {
+    return { fee: 0, deposit: 0 };
+  }
+  return { fee: notify_fee, deposit: rent };
 }
 
 export async function getFilteredProgramAccounts(
