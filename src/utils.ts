@@ -15,6 +15,10 @@ export function isDefault(key: PublicKey) {
 }
 
 export class Numberu32 extends BN {
+  constructor(value: number, base: number = 10) {
+    super(value, base);
+  }
+
   /**
    * Convert to Buffer representation
    */
@@ -47,6 +51,10 @@ export class Numberu32 extends BN {
 }
 
 export class Numberu64 extends BN {
+  constructor(buffer: Buffer) {
+    super(buffer);
+  }
+
   /**
    * Convert to Buffer representation
    */
