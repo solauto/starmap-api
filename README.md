@@ -103,6 +103,12 @@ See also [state.ts](js/api/state.ts)
 
 ## DEVELOPER
 
+Test:
+
+```bash
+npm test
+```
+
 ### INSTALL
 
 ```bash

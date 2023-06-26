@@ -27,7 +27,8 @@
     "prepare": "tsc",
     "build": "tsc",
     "pretty": "prettier --check 'src/**/*.[jt]s'",
-    "pretty:fix": "prettier --write 'src/**/*.[jt]s'"
+    "pretty:fix": "prettier --write 'src/**/*.[jt]s'",
+    "test": "jest"
   },
   "prettier": {
     "singleQuote": true
