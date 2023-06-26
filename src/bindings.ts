@@ -2,7 +2,6 @@ import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
   AccountInfo,
   Connection,
-  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
